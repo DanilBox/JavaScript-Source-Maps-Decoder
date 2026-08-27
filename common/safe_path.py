@@ -23,7 +23,7 @@ class SafePath:
         if isinstance(path_part, SafePath):
             add_path_part = path_part.path
         else:
-            add_path_part = Path(path_part)  # type: ignore [arg-type]
+            add_path_part = Path(path_part)
 
         new_path = self._safe_path / add_path_part
 
