@@ -5,6 +5,8 @@ from typing import Any, NamedTuple, TypedDict
 from common.error import Error, error
 from common.map_counter import MapCounter
 
+SUPPORTED_SOURCE_MAP_VERSION = 3
+
 
 class SourceMap(NamedTuple):
     version: int
@@ -54,14 +56,14 @@ def parse_suffix(file_path: str) -> str:
 def decode(content: str) -> Error | DecodeResult:
     sm = parse_content(content)
 
-    if sm.version != 3:
+    if sm.version != SUPPORTED_SOURCE_MAP_VERSION:
         return error(f"Source Maps версии {sm.version} не поддерживается")
 
     files: dict[str, str] = {}
     suffix_stats = MapCounter()
 
-    for idx, file_path in enumerate(sm.sources):
-        file_path = remove_prefix(file_path)
+    for idx, source_path in enumerate(sm.sources):
+        file_path = remove_prefix(source_path)
         file_content = sm.sourcesContent[idx]
 
         suffix_stats.increment(parse_suffix(file_path))

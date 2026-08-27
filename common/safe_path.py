@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Self
 
 PyPath = Path | str
 
@@ -19,7 +20,7 @@ class SafePath:
         self._safe_path = save_path
         self._original_absolute: str = str(save_path.resolve().absolute())
 
-    def __truediv__(self, path_part: PyPath | Self) -> Self:
+    def __truediv__(self, path_part: PyPath | SafePath) -> SafePath:
         if isinstance(path_part, SafePath):
             add_path_part = path_part.path
         else:
@@ -33,7 +34,7 @@ class SafePath:
 
         save_path = SafePath(new_path)
         save_path._set_absolute(self._original_absolute)
-        return save_path  # type: ignore [return-value]
+        return save_path
 
     def _set_absolute(self, absolute_path: str) -> None:
         self._original_absolute = absolute_path

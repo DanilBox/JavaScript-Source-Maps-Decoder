@@ -32,7 +32,7 @@ def parse_array_urls_line(urls_line: str) -> list[str]:
 def get_urls_from_file(input_file: str) -> list[str]:
     file_path = Path(input_file)
     if not file_path.exists():
-        exit(f"Файл '{file_path.name}' не существует")
+        sys.exit(f"Файл '{file_path.name}' не существует")
 
     urls: list[str] = []
 
@@ -61,7 +61,7 @@ def regexp_compile(regexp: str) -> Pattern[str] | None:
 def urls_filter(urls: list[str], filter_regexp: str) -> list[str]:
     _re = regexp_compile(filter_regexp)
     if _re is None:
-        exit("Ошибка в регулярном выражении")
+        sys.exit("Ошибка в регулярном выражении")
 
     filtered_urls: list[str] = []
     for url in urls:
@@ -88,7 +88,7 @@ def urls_modify(urls: list[str], file_type: FileType) -> list[str]:
 
 def download_by_url(url: str) -> str | None:
     try:
-        _r = requests.get(url)
+        _r = requests.get(url, timeout=30)
     except requests.exceptions.RequestException:
         return None
 

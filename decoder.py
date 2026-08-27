@@ -40,7 +40,9 @@ def get_saved_folder(map_file: Path) -> str:
     for suffix in suffixes:
         file_name = file_name.removesuffix(suffix)
 
-    assert not file_name.endswith(".js") and not file_name.endswith(".map"), "Не правильно удалились расширения"
+    if file_name.endswith(".js") or file_name.endswith(".map"):
+        raise RuntimeError("Не правильно удалились расширения")
+
     return file_name
 
 
@@ -70,7 +72,8 @@ def save_decode_result(output_folder: Path, bundle_name: str, decode_result: sou
 
     # Папка в который лежит бандл, относительной данной папки, мы и будет сохранять файлы
     relative_folder_in_sm = Path(decode_result.sourceMapStatistic["sourceMapPath"]).parent
-    for file_path, file_content in decode_result.files.items():
+    for original_file_path, file_content in decode_result.files.items():
+        file_path = original_file_path
         if check_in_forbidden_symbols(file_path):
             forbidden_paths.append(file_path)
             print("[INFO]", f"Файл '{file_path}' был убран для сохранения")
@@ -112,7 +115,7 @@ def save_decode_result(output_folder: Path, bundle_name: str, decode_result: sou
 
 def get_sources_maps_files(input_path: Path) -> list[Path]:
     if not input_path.exists():
-        exit(f"Файл или папки '{input_path}' не существует")
+        sys.exit(f"Файл или папки '{input_path}' не существует")
 
     if input_path.is_dir():
         return [file for file in input_path.glob("*.map") if file.is_file()]
@@ -120,7 +123,7 @@ def get_sources_maps_files(input_path: Path) -> list[Path]:
     if input_path.is_file():
         return [input_path]
 
-    exit(f"Невозможно определить тип пути: {input_path}")
+    sys.exit(f"Невозможно определить тип пути: {input_path}")
 
 
 def decoder(input_path: str, output_folder: str) -> None:
