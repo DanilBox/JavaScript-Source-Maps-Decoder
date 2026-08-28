@@ -73,6 +73,7 @@ def save_decode_result(output_folder: Path, bundle_name: str, decode_result: sou
     forbidden_paths: list[str] = []
     renamed_paths: dict[str, str] = {}
     deduplicated: dict[str, str] = {}
+    saved_file_contents: dict[Path, str] = {}
 
     # Папка в который лежит бандл, относительной данной папки, мы и будет сохранять файлы
     relative_folder_in_sm = Path(decode_result.sourceMapStatistic["sourceMapPath"]).parent
@@ -106,13 +107,34 @@ def save_decode_result(output_folder: Path, bundle_name: str, decode_result: sou
         if not saved_file_path.parent.exists():
             saved_file_path.parent.mkdir(parents=True)
 
-        if saved_file_path.exists():
+        saved_file_exists = False
+        if saved_file_path in saved_file_contents:
+            saved_file_exists = True
+            if saved_file_contents[saved_file_path] == file_content:
+                print(
+                    "[INFO]",
+                    f"Дубликат файла '{saved_file_path}' был убран, так как файл уже находится в памяти",
+                )
+                continue
+
+        if not saved_file_exists and saved_file_path.exists():
+            saved_file_exists = True
+            if saved_file_path.read_text() == file_content:
+                saved_file_contents[saved_file_path] = file_content
+                print(
+                    "[INFO]",
+                    f"Дубликат файла '{saved_file_path}' был убран, так как файл уже находится в файловой системе",
+                )
+                continue
+
+        if saved_file_exists:
             old_file_path = str(saved_file_path)
             print("[INFO]", f"Задублирование файла '{saved_file_path}'")
 
             saved_file_path = Path(f"{saved_file_path}?dep2")
             deduplicated[old_file_path] = str(saved_file_path)
 
+        saved_file_contents[saved_file_path] = file_content
         saved_file_path.write_text(file_content)
 
     decoder_statistic = DecoderStatistic(
