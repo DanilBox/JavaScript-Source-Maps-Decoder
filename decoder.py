@@ -57,6 +57,10 @@ def remove_first_slash(file_path: str) -> str:
     return file_path
 
 
+def is_generated_source_path(file_path: str) -> bool:
+    return "/./" in file_path
+
+
 def save_decode_result(output_folder: Path, bundle_name: str, decode_result: source_maps.DecodeResult) -> None:
     folder_path = output_folder / bundle_name
     if not folder_path.exists():
@@ -72,8 +76,16 @@ def save_decode_result(output_folder: Path, bundle_name: str, decode_result: sou
 
     # Папка в который лежит бандл, относительной данной папки, мы и будет сохранять файлы
     relative_folder_in_sm = Path(decode_result.sourceMapStatistic["sourceMapPath"]).parent
-    for original_file_path, file_content in decode_result.files.items():
+
+    # Сборщик по-разному обозначает путь исходника и путь сгенерированного модуля.
+    # После нормализации они совпадают, поэтому сначала сохраняем исходник.
+    # Тогда суффикс дубликата получает сгенерированная версия.
+    file_paths_to_save = sorted(decode_result.files, key=is_generated_source_path)
+
+    for original_file_path in file_paths_to_save:
+        file_content = decode_result.files[original_file_path]
         file_path = original_file_path
+
         if check_in_forbidden_symbols(file_path):
             forbidden_paths.append(file_path)
             print("[INFO]", f"Файл '{file_path}' был убран для сохранения")

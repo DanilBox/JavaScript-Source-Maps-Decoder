@@ -11,6 +11,7 @@ __pycache__/
 .DS_Store
 
 # Project
+*.txt
 /maps_list.txt
 /maps_files*
 /output*
