@@ -11,6 +11,7 @@ import requests
 
 class FileType(StrEnum):
     JS = "js"
+    CSS = "css"
     MAP = "map"
     AUTO = "auto"
 
@@ -80,10 +81,11 @@ def urls_modify(urls: list[str], file_type: FileType) -> list[str]:
     match file_type:
         case FileType.MAP:
             return urls
-        case FileType.JS:
+        case FileType.JS | FileType.CSS:
             return [f"{url}.map" for url in urls]
         case FileType.AUTO:
-            return [f"{url}.map" for url in urls if url.endswith(".js")]
+            supported_suffixes = (".js", ".css")
+            return [f"{url}.map" for url in urls if url.endswith(supported_suffixes)]
 
 
 def download_by_url(url: str) -> str | None:

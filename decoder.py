@@ -34,13 +34,13 @@ def remove_renamed_symbols(file_path: str) -> str:
 
 
 def get_saved_folder(map_file: Path) -> str:
-    suffixes = [".map", ".js"]
+    suffixes = [".map", ".js", ".css"]
 
     file_name = map_file.name
     for suffix in suffixes:
         file_name = file_name.removesuffix(suffix)
 
-    if file_name.endswith(".js") or file_name.endswith(".map"):
+    if any(file_name.endswith(suffix) for suffix in suffixes):
         raise RuntimeError("Не правильно удалились расширения")
 
     return file_name
