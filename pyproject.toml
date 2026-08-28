@@ -48,6 +48,7 @@ select = [
     "UP", # pyupgrade
 ]
 ignore = [
+    "PLR0915",
     "RUF001",
 ]
 

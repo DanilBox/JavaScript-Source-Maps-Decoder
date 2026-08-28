@@ -16,6 +16,7 @@ class DecoderStatistic(TypedDict):
     forbiddenPaths: list[str]
     renamedPaths: dict[str, str]
     deduplicated: dict[str, str]
+    originalPaths: list[str]
 
 
 def check_in_forbidden_symbols(file_path: str) -> bool:
@@ -73,6 +74,7 @@ def save_decode_result(output_folder: Path, bundle_name: str, decode_result: sou
     forbidden_paths: list[str] = []
     renamed_paths: dict[str, str] = {}
     deduplicated: dict[str, str] = {}
+    original_paths: list[str] = []
     saved_file_contents: dict[Path, str] = {}
 
     # Папка в который лежит бандл, относительной данной папки, мы и будет сохранять файлы
@@ -106,6 +108,9 @@ def save_decode_result(output_folder: Path, bundle_name: str, decode_result: sou
         saved_file_path = safe_path_join(files_folder_path, file_path_in_sm)
         if not saved_file_path.parent.exists():
             saved_file_path.parent.mkdir(parents=True)
+
+        if not is_generated_source_path(original_file_path):
+            original_paths.append(file_path)
 
         saved_file_exists = False
         if saved_file_path in saved_file_contents:
@@ -141,6 +146,7 @@ def save_decode_result(output_folder: Path, bundle_name: str, decode_result: sou
         forbiddenPaths=forbidden_paths,
         renamedPaths=renamed_paths,
         deduplicated=deduplicated,
+        originalPaths=original_paths,
     )
 
     save_statistic_file(folder_path / "statistic.json", decode_result.sourceMapStatistic)
