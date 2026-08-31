@@ -63,6 +63,10 @@ def is_generated_source_path(file_path: str) -> bool:
     return "/./" in file_path
 
 
+def separate_generated_source_path(file_path: str) -> str:
+    return file_path.replace("/./", "/__generated__/")
+
+
 def get_available_file_path(file_path: Path, file_content: str) -> Path:
     content_hash = hashlib.sha256(file_content.encode()).hexdigest()
     hash_length = 4
@@ -118,7 +122,7 @@ def save_decode_result(output_folder: Path, bundle_name: str, decode_result: sou
         file_path = remove_first_slash(file_path)
 
         # Путь восстанавливаемого файла в Sources Map
-        file_path_in_sm = relative_folder_in_sm / file_path
+        file_path_in_sm = relative_folder_in_sm / separate_generated_source_path(file_path)
 
         saved_file_path = safe_path_join(files_folder_path, file_path_in_sm)
         if not saved_file_path.parent.exists():
