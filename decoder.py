@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -60,6 +61,20 @@ def remove_first_slash(file_path: str) -> str:
 
 def is_generated_source_path(file_path: str) -> bool:
     return "/./" in file_path
+
+
+def get_available_file_path(file_path: Path, file_content: str) -> Path:
+    content_hash = hashlib.sha256(file_content.encode()).hexdigest()
+    hash_length = 4
+
+    while hash_length <= len(content_hash):
+        duplicate_file_path = Path(f"{file_path}?{content_hash[:hash_length]}")
+        if not duplicate_file_path.exists() or duplicate_file_path.read_text() == file_content:
+            return duplicate_file_path
+
+        hash_length += 4
+
+    raise RuntimeError(f"Не удалось подобрать уникальное имя для файла '{file_path}'")
 
 
 def save_decode_result(output_folder: Path, bundle_name: str, decode_result: source_maps.DecodeResult) -> None:
@@ -136,7 +151,7 @@ def save_decode_result(output_folder: Path, bundle_name: str, decode_result: sou
             old_file_path = str(saved_file_path)
             print("[INFO]", f"Задублирование файла '{saved_file_path}'")
 
-            saved_file_path = Path(f"{saved_file_path}?dep2")
+            saved_file_path = get_available_file_path(saved_file_path, file_content)
             deduplicated[old_file_path] = str(saved_file_path)
 
         saved_file_contents[saved_file_path] = file_content
