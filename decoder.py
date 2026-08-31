@@ -185,10 +185,13 @@ def get_sources_maps_files(input_path: Path) -> list[Path]:
     sys.exit(f"Невозможно определить тип пути: {input_path}")
 
 
-def decoder(input_path: str, output_folder: str) -> None:
+def decoder(input_path: str, output_folder: str, *, force: bool = False) -> None:
     output_path = Path(output_folder)
     if output_path.exists():
-        print("[WARNING]", f"Папка '{output_folder}', уже существует, возможны ошибки при работе программы")
+        if not force:
+            sys.exit(f"Папка '{output_folder}' уже существует. Для продолжения используйте флаг '--force'")
+
+        print("[WARNING]", f"Папка '{output_folder}' уже существует, возможны ошибки при работе программы")
     else:
         output_path.mkdir(parents=True)
 
@@ -220,6 +223,12 @@ def main(argv: list[str]) -> None:
         type=str,
         default="output",
         help="Путь до папки для вывода",
+    )
+    parser.add_argument(
+        "-F",
+        "--force",
+        action="store_true",
+        help="Разрешить декодирование в уже существующую папку",
     )
 
     args = parser.parse_args(argv)
